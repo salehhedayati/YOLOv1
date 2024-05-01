@@ -51,11 +51,11 @@ class YoloLoss(nn.Module):
         # For No Object Loss       #
         # =========================#
         # (N*S*S*1)
-        object_loss = self.mse(
+        no_obj_loss = self.mse(
             torch.flatten((1 - exists_box) * predictions[..., 20:21]),
             torch.flatten((1 - exists_box) * target[..., 20:21]),
         )
-        object_loss += self.mse(
+        no_obj_loss += self.mse(
             torch.flatten((1 - exists_box) * predictions[..., 25:26]),
             torch.flatten((1 - exists_box) * target[..., 20:21]),
         )
