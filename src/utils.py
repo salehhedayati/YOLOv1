@@ -1,14 +1,14 @@
 import torch
 
-def iou(predictions, targets):
+def iou(predictions, target):
     box1_x1 = predictions[..., 0:1] - predictions[..., 2:3]/2
     box1_y1 = predictions[..., 1:2] - predictions[..., 3:4]/2
     box1_x2 = predictions[..., 0:1] + predictions[..., 2:3]/2
     box1_y2 = predictions[..., 1:2] + predictions[..., 3:4]/2
-    box2_x1 = targets[..., 0:1] - targets[..., 2:3]/2
-    box2_y1 = targets[..., 1:2] - targets[..., 3:4]/2
-    box2_x2 = targets[..., 0:1] + targets[..., 2:3]/2
-    box2_y2 = targets[..., 1:2] + targets[..., 3:4]/2
+    box2_x1 = target[..., 0:1] - target[..., 2:3]/2
+    box2_y1 = target[..., 1:2] - target[..., 3:4]/2
+    box2_x2 = target[..., 0:1] + target[..., 2:3]/2
+    box2_y2 = target[..., 1:2] + target[..., 3:4]/2
     
     x1 = torch.max(box1_x1, box2_x1)
     y1 = torch.max(box1_y1, box2_y1)
@@ -34,7 +34,3 @@ targets = torch.tensor([
     [0.7, 0.6, 0.3, 5.4],
     [0.4, 0.3, 0.5, 9.6]
 ])
-
-# Compute IoU
-iou = iou(predictions, targets)
-print("Intersection over Union (IoU):", iou)
