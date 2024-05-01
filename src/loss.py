@@ -73,19 +73,3 @@ class YoloLoss(nn.Module):
         
         return loss
         
-        
-# # Example tensors
-# pred_box = torch.randn(2, 2, 2, 1)
-# target = torch.randn(2, 2, 2, 1)
-# exists_box = torch.randn(2, 2, 2, 1)
-
-# # Concatenate the tensors along the last dimension
-# combined_tensor = torch.cat([tensor1.unsqueeze(0), tensor2.unsqueeze(0)], dim=0)
-
-# # Find the maximum values and their corresponding indices along the last dimension
-# max_values, max_indices = torch.max(combined_tensor, dim=0)
-
-# print("Maximum values shape:", max_values.shape)  # Shape: (N, 7, 7)
-# print("Maximum indices shape:", max_indices.shape)  # Shape: (N, 7, 7)
-
-# target.shape = torch.rand((1, 7, 7, 25))
