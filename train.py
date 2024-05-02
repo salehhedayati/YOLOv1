@@ -21,7 +21,7 @@ BATCH_SIZE = 16 # 64 in original paper but I don't have that much vram, grad acc
 WEIGHT_DECAY = 0
 EPOCHS = 1000
 NUM_WORKERS = 2
-# PIN_MEMORY = True
+PIN_MEMORY = True
 LOAD_MODEL = False
 LOAD_MODEL_FILE = "overfit.pth.tar"
 IMG_DIR = "data/archive/images"
@@ -45,10 +45,7 @@ def train_fn(train_loader, model, optimizer, loss_fn):
 
     for batch_idx, (x, y) in enumerate(loop):
         x, y = x.to(DEVICE), y.to(DEVICE)
-        print(x.shape)
-        print(y.shape)
         out = model(x)
-        print(out.shape)
         loss = loss_fn(out, y)
         mean_loss.append(loss.item())
         optimizer.zero_grad()
@@ -85,7 +82,7 @@ def main():
         dataset=train_dataset,
         batch_size=BATCH_SIZE,
         num_workers=NUM_WORKERS,
-        # pin_memory=PIN_MEMORY,
+        pin_memory=PIN_MEMORY,
         shuffle=True,
         drop_last=False,
     )
@@ -94,7 +91,7 @@ def main():
         dataset=test_dataset,
         batch_size=BATCH_SIZE,
         num_workers=NUM_WORKERS,
-        # pin_memory=PIN_MEMORY,
+        pin_memory=PIN_MEMORY,
         shuffle=False,
         drop_last=True,
     )

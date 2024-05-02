@@ -25,9 +25,9 @@ class YoloLoss(nn.Module):
         # For Box Cordinates Loss  #
         # =========================#
         box_predictions = exists_box * (best_box * predictions[..., 26:30] + (1 - best_box) * predictions[..., 21:25])
+        box_predictions_clone = box_predictions.clone() # to avoid in-place operation, it is a variables needed for gradient computation
         
         box_targets = exists_box * target[..., 21:25]
-        box_predictions_clone = box_predictions.clone()
         box_predictions_clone[..., 2:4] = torch.sign(box_predictions[..., 2:4]) * torch.sqrt(torch.abs(box_predictions[..., 2:4]) + 1e-6)
         box_targets[..., 2:4] = torch.sqrt(box_targets[..., 2:4])
         
