@@ -93,10 +93,10 @@ class YOLOv1(nn.Module):
         S, B, C = split_size, num_boxes, num_classes
         return nn.Sequential(
             nn.Flatten(),
-            nn.Linear(1024 * S * S, 4096),
+            nn.Linear(1024 * S * S, 496),
             nn.Dropout(0.0),
             nn.LeakyReLU(0.1),
-            nn.Linear(4096, S * S * (5 * B + C)), # (5, 5, 30) where C+B*5 = 5
+            nn.Linear(496, S * S * (5 * B + C)), # (5, 5, 30) where C+B*5 = 5
         )
     
 # def test(S=7, B=2, C=20):
