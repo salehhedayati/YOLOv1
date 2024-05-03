@@ -6,7 +6,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from model import YOLOv1
 from data.dataset import VOCDataset
-from utils import iou, get_bboxes, load_checkpoint
+from utils import IoU, get_bboxes, load_checkpoint
 from loss import YoloLoss
 
 torch.autograd.set_detect_anomaly(True)
