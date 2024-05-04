@@ -99,6 +99,28 @@ def mAP(pred_boxes, true_boxes, iou_threshold=0.5, num_classes=20, plot=True):
             plt.show()
         
     return sum(average_precisions) / len(average_precisions), precisions, recalls
+
+def nms(bboxes, iou_threshold, threshold):
+    
+    assert type(bboxes) == list
+    # bboxes (list) : [[class_pred, prob_score, x, y, w, h], ...]
+    bboxes = [box for box in bboxes if box[1] > threshold]
+    bboxes = sorted(bboxes, key=lambda x:x[1], reversed=True)
+    bboxes_after_nms = []
+    
+    while bboxes:
+        chosen_box = bboxes.pop(0)
+        
+        bboxes = [
+            box
+            for box in bboxes
+            if box[0] != chosen_box[0]
+            or IoU(torch.tensor(chosen_box[2:]), torch.tensor(box[2:])) < iou_threshold
+        ]
+        
+        bboxes_after_nms.append(chosen_box)
+        
+    return bboxes_after_nms
         
 # test
 true_boxes = [

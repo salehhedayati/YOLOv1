@@ -1,4 +1,4 @@
 .ipynb_checkpoints
 archive
-__pycache__/
+__pycache__
 .DS_Store
