@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from utils import iou
+from utils import IoU
 class YoloLoss(nn.Module):
     def __init__(self, S=7, B=2, C=20):
         super().__init__()
@@ -15,8 +15,8 @@ class YoloLoss(nn.Module):
         # predictions = [p0, ..., p19, c, x1, y1, w1, h1, x2, y2, w2, h2]
         predictions = predictions.reshape(-1, self.S, self.S, self.C + self.B*5)
 
-        iou_b1 = iou(predictions[..., 21:25], target[..., 21:25])
-        iou_b2 = iou(predictions[..., 26:30], target[..., 21:25])
+        iou_b1 = IoU(predictions[..., 21:25], target[..., 21:25])
+        iou_b2 = IoU(predictions[..., 26:30], target[..., 21:25])
         ious = torch.cat([iou_b1.unsqueeze(0), iou_b2.unsqueeze(0)], dim=0)
         iou_maxes, best_box = torch.max(ious, dim=0)
         exists_box = target[..., 20].unsqueeze(3) # 1obj_i
