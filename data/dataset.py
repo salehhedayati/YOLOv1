@@ -62,13 +62,13 @@ class VOCDataset(torch.utils.data.Dataset):
 
 # i_s, js, xs, ys = [], [], [], []
 # for box in boxes:
-#         class_labal, x, y, width, height = boxes[0].tolist()
-#         class_label = int(class_labal)
-#         i, j = int(7 * y), int(7 * x)
-#         x_cell, y_cell = 7 * x - j, 7 * y - i
-#         i_s.append(i)
-#         js.append(j)
-#         xs.append(x_cell)
-#         ys.append(y_cell)
+#     class_labal, x, y, width, height = boxes[0].tolist()
+#     class_label = int(class_labal)
+#     i, j = int(7 * y), int(7 * x)
+#     x_cell, y_cell = 7 * x - j, 7 * y - i
+#     i_s.append(i)
+#     js.append(j)
+#     xs.append(x_cell)
+#     ys.append(y_cell)
         
 # width_cell, height_cell = 7 * width, 7 * height
