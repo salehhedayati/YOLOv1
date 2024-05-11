@@ -49,8 +49,3 @@ class VOCDataset(torch.utils.data.Dataset):
                 label_matrix[i, j, class_label] = 1
                 
         return image, label_matrix
-            
-# # test
-# label_dir = "./archive/labels"
-# img_dir = "./archive/images"
-# csv_file = "./archive/train.csv"
