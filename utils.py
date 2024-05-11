@@ -194,7 +194,6 @@ def convert_cellboxes(predictions, S=7):
     """
 
     predictions = predictions.to("cpu")
-    print(predictions.shape)
     batch_size = predictions.shape[0]
     predictions = predictions.reshape(batch_size, 7, 7, 30)
     bboxes1 = predictions[..., 21:25]
