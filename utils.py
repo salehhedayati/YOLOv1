@@ -18,7 +18,7 @@ def IoU(predictions, target):
     x2 = torch.min(pred_x2, target_x2)
     y2 = torch.min(pred_y2, target_y2)
     
-    intersection = (x2 - x1).clamp(0) * (y2 - y1).clamp(0)
+    intersection = (x2 - x1).clamp(0) * (y2 - y1).clamp(0) # equal to 0 for cells with no target
     
     a1 = abs((pred_x2 - pred_x1) * (pred_y2 - pred_y1))
     a2 = abs((target_x2 - target_x1) * (target_y2 - target_y1))
