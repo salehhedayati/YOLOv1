@@ -3,6 +3,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 
 def IoU(predictions, target):
+    # predictions/target (N, S, S, 4)
     box1_x1 = predictions[..., 0:1] - predictions[..., 2:3]/2
     box1_y1 = predictions[..., 1:2] - predictions[..., 3:4]/2
     box1_x2 = predictions[..., 0:1] + predictions[..., 2:3]/2
@@ -194,7 +195,6 @@ def convert_cellboxes(predictions, S=7):
     """
 
     predictions = predictions.to("cpu")
-    print(predictions.shape)
     batch_size = predictions.shape[0]
     predictions = predictions.reshape(batch_size, 7, 7, 30)
     bboxes1 = predictions[..., 21:25]

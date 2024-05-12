@@ -45,30 +45,7 @@ class VOCDataset(torch.utils.data.Dataset):
             
             if label_matrix[i, j, 20] == 0:
                 label_matrix[i, j, 20] = 1
-                box_cordinates = torch.tensor(
-                    [x_cell, y_cell, width_cell, height_cell]
-                )
-                label_matrix[i, j, 21:25] = box_cordinates
+                label_matrix[i, j, 21:25] = torch.tensor([x_cell, y_cell, width_cell, height_cell])
                 label_matrix[i, j, class_label] = 1
                 
         return image, label_matrix
-            
-# # test
-# label_dir = "./archive/labels"
-# img_dir = "./archive/images"
-# csv_file = "./archive/8examples.csv"
-# label_path = os.path.join(label_dir, annotations.iloc[1, 1])
-# img_path = os.path.join(img_dir, annotations.iloc[1, 0])
-
-# i_s, js, xs, ys = [], [], [], []
-# for box in boxes:
-#     class_labal, x, y, width, height = boxes[0].tolist()
-#     class_label = int(class_labal)
-#     i, j = int(7 * y), int(7 * x)
-#     x_cell, y_cell = 7 * x - j, 7 * y - i
-#     i_s.append(i)
-#     js.append(j)
-#     xs.append(x_cell)
-#     ys.append(y_cell)
-        
-# width_cell, height_cell = 7 * width, 7 * height

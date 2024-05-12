@@ -1,4 +1,6 @@
 .ipynb_checkpoints
-archive
+archive/
 __pycache__
 .DS_Store
+src/
+notebooks/
