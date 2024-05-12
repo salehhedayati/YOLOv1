@@ -9,8 +9,6 @@ from data.dataset import VOCDataset
 from utils import IoU, get_bboxes, load_checkpoint
 from loss import YoloLoss
 
-torch.autograd.set_detect_anomaly(True)
-
 seed = 123
 torch.manual_seed(seed)
 

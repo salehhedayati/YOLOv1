@@ -4,24 +4,24 @@ import matplotlib.pyplot as plt
 
 def IoU(predictions, target):
     # predictions/target (N, S, S, 4)
-    box1_x1 = predictions[..., 0:1] - predictions[..., 2:3]/2
-    box1_y1 = predictions[..., 1:2] - predictions[..., 3:4]/2
-    box1_x2 = predictions[..., 0:1] + predictions[..., 2:3]/2
-    box1_y2 = predictions[..., 1:2] + predictions[..., 3:4]/2
-    box2_x1 = target[..., 0:1] - target[..., 2:3]/2
-    box2_y1 = target[..., 1:2] - target[..., 3:4]/2
-    box2_x2 = target[..., 0:1] + target[..., 2:3]/2
-    box2_y2 = target[..., 1:2] + target[..., 3:4]/2
+    pred_x1 = predictions[..., 0:1] - predictions[..., 2:3]/2
+    pred_y1 = predictions[..., 1:2] - predictions[..., 3:4]/2
+    pred_x2 = predictions[..., 0:1] + predictions[..., 2:3]/2
+    pred_y2 = predictions[..., 1:2] + predictions[..., 3:4]/2
+    target_x1 = target[..., 0:1] - target[..., 2:3]/2
+    target_y1 = target[..., 1:2] - target[..., 3:4]/2
+    target_x2 = target[..., 0:1] + target[..., 2:3]/2
+    target_y2 = target[..., 1:2] + target[..., 3:4]/2
     
-    x1 = torch.max(box1_x1, box2_x1)
-    y1 = torch.max(box1_y1, box2_y1)
-    x2 = torch.min(box1_x2, box2_x2)
-    y2 = torch.min(box1_y2, box2_y2)
+    x1 = torch.max(pred_x1, target_x1)
+    y1 = torch.max(pred_y1, target_y1)
+    x2 = torch.min(pred_x2, target_x2)
+    y2 = torch.min(pred_y2, target_y2)
     
     intersection = (x2 - x1).clamp(0) * (y2 - y1).clamp(0)
     
-    a1 = abs((box1_x2 - box1_x1) * (box1_y2 - box1_y1))
-    a2 = abs((box2_x2 - box2_x1) * (box2_y2 - box2_y1))
+    a1 = abs((pred_x2 - pred_x1) * (pred_y2 - pred_y1))
+    a2 = abs((target_x2 - target_x1) * (target_y2 - target_y1))
     
     return intersection / (a1 + a2 - intersection + 1e-6)
 
