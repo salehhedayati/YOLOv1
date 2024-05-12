@@ -31,10 +31,11 @@ class YoloLoss(nn.Module):
         box_predictions_clone[..., 2:4] = torch.sign(box_predictions[..., 2:4]) * torch.sqrt(torch.abs(box_predictions[..., 2:4]) + 1e-6)
         box_targets[..., 2:4] = torch.sqrt(box_targets[..., 2:4])
         
-        # (N, S, S, 4) -> (N*S*S, 4)
+        # finally mse compute the squared difference between corresponding elements
+        # (N, S, S, 4)
         box_loss = self.mse(
-            torch.flatten(box_predictions_clone, end_dim=-2),
-            torch.flatten(box_targets, end_dim=-2)
+            box_predictions_clone,
+            box_targets
             )
         
         # =========================#
@@ -42,33 +43,33 @@ class YoloLoss(nn.Module):
         # =========================#
         pred_box = best_box * predictions[..., 25:26] + (1 - best_box) * predictions[..., 20:21]
         
-        # (N*S*S*1)
+        # (N, S, S, 1)
         object_loss = self.mse(
-            torch.flatten(exists_box * pred_box),
-            torch.flatten(exists_box * target[..., 20:21]),
-        )
+            exists_box * pred_box,
+            exists_box * target[..., 20:21]
+            )
         
         # =========================#
         # For No Object Loss       #
         # =========================#
-        # (N*S*S*1)
+        # (N, S, S, 1)
         no_obj_loss = self.mse(
-            torch.flatten((1 - exists_box) * predictions[..., 20:21]),
-            torch.flatten((1 - exists_box) * target[..., 20:21]),
-        )
+            (1 - exists_box) * predictions[..., 20:21],
+            (1 - exists_box) * target[..., 20:21]
+            )
         no_obj_loss += self.mse(
-            torch.flatten((1 - exists_box) * predictions[..., 25:26]),
-            torch.flatten((1 - exists_box) * target[..., 20:21]),
-        )
+            (1 - exists_box) * predictions[..., 25:26],
+            (1 - exists_box) * target[..., 20:21]
+            )
         
         # =========================#
-        # For Box Cordinates Loss  #
+        # For Class Loss           #
         # =========================#
         # (N*S*S, 20)
         class_loss = self.mse(
-            torch.flatten(exists_box * predictions[..., :20], end_dim=-2),
-            torch.flatten(exists_box * target[..., :20], end_dim=-2)
-        )
+            exists_box * predictions[..., :20],
+            exists_box * target[..., :20]
+            )
         
         loss = self.lambda_coord * box_loss + object_loss + self.lambda_noobj * no_obj_loss + class_loss
         
