@@ -65,7 +65,7 @@ class YoloLoss(nn.Module):
         # =========================#
         # For Class Loss           #
         # =========================#
-        # (N*S*S, 20)
+        # (N, S, S, 20)
         class_loss = self.mse(
             exists_box * predictions[..., :20],
             exists_box * target[..., :20]
