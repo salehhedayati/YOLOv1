@@ -25,11 +25,11 @@ def IoU(predictions, target):
     
     return intersection / (a1 + a2 - intersection + 1e-6)
 
-def nms(bboxes, iou_threshold, threshold):
+def nms(bboxes, iou_threshold, cs_threshold):
     
     assert type(bboxes) == list
     # bboxes (list) : [[class_pred, prob_score, x, y, w, h], ...]
-    bboxes = [box for box in bboxes if box[1] > threshold]
+    bboxes = [box for box in bboxes if box[1] > cs_threshold]
     bboxes = sorted(bboxes, key=lambda x:x[1], reversed=True)
     bboxes_after_nms = []
     
@@ -172,15 +172,6 @@ def cellboxes_to_boxes(out, S=7):
 
     return all_bboxes
 
-def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
-    print("=> Saving checkpoint")
-    torch.save(state, filename)
-
-
-def load_checkpoint(checkpoint, model, optimizer):
-    print("=> Loading checkpoint")
-    model.load_state_dict(checkpoint["state_dict"])
-    optimizer.load_state_dict(checkpoint["optimizer"])
     
     
 def convert_cellboxes(predictions, S=7):
@@ -210,9 +201,7 @@ def convert_cellboxes(predictions, S=7):
     w_y = 1 / S * best_boxes[..., 2:4]
     converted_bboxes = torch.cat((x, y, w_y), dim=-1)
     predicted_class = predictions[..., :20].argmax(-1).unsqueeze(-1)
-    best_confidence = torch.max(predictions[..., 20], predictions[..., 25]).unsqueeze(
-        -1
-    )
+    best_confidence = torch.max(predictions[..., 20], predictions[..., 25]).unsqueeze(-1)
     converted_preds = torch.cat(
         (predicted_class, best_confidence, converted_bboxes), dim=-1
     )
@@ -224,8 +213,7 @@ def get_bboxes(
     loader,
     model,
     iou_threshold,
-    threshold,
-    pred_format="cells",
+    cs_threshold,
     box_format="midpoint",
     device="cuda",
 ):
@@ -238,10 +226,10 @@ def get_bboxes(
 
     for batch_idx, (x, labels) in enumerate(loader):
         x = x.to(device)
-        labels = labels.to(device)
+        labels = labels.to(device) # (N, S, S, C+5)
 
         with torch.no_grad():
-            predictions = model(x)
+            predictions = model(x) # (N, S, S, C+5*B)
 
         batch_size = x.shape[0]
         true_bboxes = cellboxes_to_boxes(labels)
@@ -251,7 +239,7 @@ def get_bboxes(
             nms_boxes = nms(
                 bboxes[idx],
                 iou_threshold=iou_threshold,
-                threshold=threshold,
+                cs_threshold=cs_threshold,
                 box_format=box_format,
             )
 
@@ -265,10 +253,20 @@ def get_bboxes(
 
             for box in true_bboxes[idx]:
                 # many will get converted to 0 pred
-                if box[1] > threshold:
+                if box[1] > cs_threshold:
                     all_true_boxes.append([train_idx] + box)
 
             train_idx += 1
 
     model.train()
     return all_pred_boxes, all_true_boxes
+
+def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+    print("=> Saving checkpoint")
+    torch.save(state, filename)
+
+
+def load_checkpoint(checkpoint, model, optimizer):
+    print("=> Loading checkpoint")
+    model.load_state_dict(checkpoint["state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer"])
