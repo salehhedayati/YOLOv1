@@ -30,12 +30,11 @@ def IoU(predictions, target):
     return intersection / (a1 + a2 - intersection + 1e-6)
 
 def nms(bboxes, iou_threshold, cs_threshold):
-    
+    # bboxes (list) : [[class_pred, prob_score, x, y, w, h], ...] -> len: S * S
     assert type(bboxes) == list
-    # bboxes (list) : [[class_pred, prob_score, x, y, w, h], ...]
     bboxes = [box for box in bboxes if box[1] > cs_threshold]
     if not bboxes:
-        print("all bboxes have confidence score less than threshold")
+        # all bboxes have confidence score less than threshold
         return []
     bboxes = sorted(bboxes, key=lambda x:x[1], reversed=True)
     bboxes_after_nms = []
@@ -118,7 +117,7 @@ def get_bboxes(
 
     # make sure model is in eval before get bboxes
     model.eval()
-    train_idx = 0
+    train_idx = 0 # image_idx accross all training images
 
     for batch_idx, (x, labels) in enumerate(loader):
         x = x.to(device)
