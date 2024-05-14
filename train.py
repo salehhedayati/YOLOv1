@@ -95,8 +95,8 @@ def main():
     )
     
     for epoch in range(EPOCHS):
-        # pred_boxes, target_boxes = get_bboxes(
-        #     train_loader, model, iou_threshold=0.5, threshold=0.5, device=DEVICE)
+        pred_boxes, target_boxes = get_bboxes(
+            train_loader, model, iou_threshold=0.5, cs_threshold=0.5, device=DEVICE)
         
         train_fn(train_loader, model, optimizer, loss_fn)
         
@@ -105,4 +105,5 @@ if __name__ == "__main__":
         
         
         
+    
     
