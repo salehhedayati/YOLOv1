@@ -1,10 +1,12 @@
 import numpy as np
 import torch
-from collections import Counter
+from collections import Counter, deque
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import torch
 from torchvision import utils
+
+from heapq import nlargest
 
 def IoU(predictions, target):
     # predictions/target (N, S, S, 4)
@@ -30,21 +32,28 @@ def IoU(predictions, target):
     return intersection / (a1 + a2 - intersection + 1e-6)
 
 def nms(bboxes, iou_threshold, cs_threshold):
-    # bboxes (list) : [[class_pred, prob_score, x, y, w, h], ...] -> len: S * S
+    # bboxes (list) : [[c, cs, x, y, w, h] x S*S]
     assert type(bboxes) == list
+    # max_values = []
+    # sorted_data = sorted(bboxes.copy(), key=lambda x: x[1], reverse=True)  # Sort in descending order
+    # sorted_deque = deque(sorted_data)
+    # max_values.extend(nlargest(2, sorted_deque, key=lambda x: x[1]))
     bboxes = [box for box in bboxes if box[1] > cs_threshold]
+    
     if not bboxes:
         # all bboxes have confidence score less than threshold
         return []
-    bboxes = sorted(bboxes, key=lambda x:x[1], reversed=True)
+    
+    sorted_bboxes = deque()
+    sorted_bboxes.extend(sorted(bboxes, key=lambda x:x[1], reverse=True))
     bboxes_after_nms = []
     
     while bboxes:
-        chosen_box = bboxes.pop(0)
+        chosen_box = sorted_bboxes.popleft()
         
         bboxes = [
             box
-            for box in bboxes
+            for box in sorted_bboxes
             if box[0] != chosen_box[0]
             or IoU(torch.tensor(chosen_box[2:]), torch.tensor(box[2:])) < iou_threshold
         ]
@@ -95,7 +104,7 @@ def convert_cellboxes(out, out_type="preds", S=7):
     predicted_class = out[..., :20].argmax(-1).unsqueeze(-1)
     if out_type == "labels":
         best_confidence = out[..., 20].unsqueeze(-1)
-        converted_bboxes = converted_bboxes * best_confidence # tensor([0.2470, 0.5613, 0.1060, 0.4613])
+        converted_bboxes = converted_bboxes * best_confidence
     elif out_type == 'preds':
         best_confidence = torch.max(out[..., 20], out[..., 25]).unsqueeze(-1)
     converted_preds = torch.cat(
@@ -105,13 +114,11 @@ def convert_cellboxes(out, out_type="preds", S=7):
     return converted_preds
 
 
-def get_bboxes(
-    loader,
-    model,
-    iou_threshold,
-    cs_threshold,
-    device="cuda",
-):
+def get_bboxes(loader, model, iou_threshold, cs_threshold, device="cuda"):
+    """
+    Return all ground truths and all prediction bounding boxes, possibly 
+    zero according to cs_threshold level, for all training images
+    """
     all_pred_boxes = []
     all_true_boxes = []
 
@@ -127,12 +134,12 @@ def get_bboxes(
             predictions = model(x) # (N, S * S * C+5*B)
 
         batch_size = x.shape[0]
-        # conver labels and predictions' cells to image ratio cordinates 
+        # in each batch convert labels and predictions' cells to image ratio cordinates 
         true_bboxes = cellboxes_to_boxes(labels, out_type="labels")
-        pred_bboxes = cellboxes_to_boxes(predictions, out_type="preds")
+        pred_bboxes = cellboxes_to_boxes(predictions, out_type="preds") # [[[c, cs, x, y, w, h] x S*S] x N]
 
+        # for each image in the batch
         for idx in range(batch_size):
-            # computed per each image in the batch
             nms_boxes = nms(pred_bboxes[idx], iou_threshold, cs_threshold)
 
 
@@ -140,6 +147,7 @@ def get_bboxes(
             #    plot_image(x[idx].permute(1,2,0).to("cpu"), nms_boxes)
             #    print(nms_boxes)
 
+            # add [train_idx] in front of all nms_boxes & true_bboxes[idx]
             for nms_box in nms_boxes:
                 all_pred_boxes.append([train_idx] + nms_box)
 
