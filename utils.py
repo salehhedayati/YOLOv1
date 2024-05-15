@@ -6,8 +6,6 @@ import matplotlib.patches as patches
 import torch
 from torchvision import utils
 
-from heapq import nlargest
-
 def IoU(predictions, target):
     # predictions/target (N, S, S, 4)
     p_x1 = predictions[..., 0:1] - predictions[..., 2:3]/2
@@ -34,10 +32,6 @@ def IoU(predictions, target):
 def nms(bboxes, iou_threshold, cs_threshold):
     # bboxes (list) : [[c, cs, x, y, w, h] x S*S]
     assert type(bboxes) == list
-    # max_values = []
-    # sorted_data = sorted(bboxes.copy(), key=lambda x: x[1], reverse=True)  # Sort in descending order
-    # sorted_deque = deque(sorted_data)
-    # max_values.extend(nlargest(2, sorted_deque, key=lambda x: x[1]))
     bboxes = [box for box in bboxes if box[1] > cs_threshold]
     
     if not bboxes:
@@ -46,8 +40,8 @@ def nms(bboxes, iou_threshold, cs_threshold):
     
     sorted_bboxes = deque()
     sorted_bboxes.extend(sorted(bboxes, key=lambda x:x[1], reverse=True))
-    bboxes_after_nms = []
     
+    bboxes_after_nms = []
     while bboxes:
         chosen_box = sorted_bboxes.popleft()
         
